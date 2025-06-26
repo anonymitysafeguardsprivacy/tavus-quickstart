@@ -28,8 +28,8 @@ export const createConversation = async (
   }
   
   const payload = {
-    persona_id: settings.persona || "pa8f0acdbb4d",
-    replica_id: settings.replica || "r9c55f9312fb",
+    persona_id: settings.persona || "p53279eb2464",
+    replica_id: settings.replica || "rb17cf590e15",
     custom_greeting: settings.greeting !== undefined && settings.greeting !== null 
       ? settings.greeting 
       : "Hello! I'm your AI financial mentor. I'm here to help you navigate your financial journey, whether it's investment planning, budgeting, retirement strategies, or understanding complex financial concepts. What financial goals would you like to discuss today?",

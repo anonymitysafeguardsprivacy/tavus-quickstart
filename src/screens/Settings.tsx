@@ -73,24 +73,6 @@ const Textarea = React.forwardRef<
 });
 Textarea.displayName = "Textarea";
 
-// Select Component
-const Select = React.forwardRef<
-  HTMLSelectElement,
-  React.SelectHTMLAttributes<HTMLSelectElement>
->(({ className, ...props }, ref) => {
-  return (
-    <select
-      className={cn(
-        "flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-        className
-      )}
-      ref={ref}
-      {...props}
-    />
-  );
-});
-Select.displayName = "Select";
-
 // Label Component
 const Label = React.forwardRef<
   HTMLLabelElement,
@@ -108,6 +90,24 @@ const Label = React.forwardRef<
   );
 });
 Label.displayName = "Label";
+
+// Select Component
+const Select = React.forwardRef<
+  HTMLSelectElement,
+  React.SelectHTMLAttributes<HTMLSelectElement>
+>(({ className, ...props }, ref) => {
+  return (
+    <select
+      className={cn(
+        "flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        className
+      )}
+      ref={ref}
+      {...props}
+    />
+  );
+});
+Select.displayName = "Select";
 
 export const Settings: React.FC = () => {
   const [settings, setSettings] = useAtom(settingsAtom);
@@ -269,7 +269,7 @@ export const Settings: React.FC = () => {
                   id="persona"
                   value={settings.persona}
                   onChange={(e) => setSettings({ ...settings, persona: e.target.value })}
-                  placeholder="pa8f0acdbb4d"
+                  placeholder="p53279eb2464"
                   className="bg-black/20 font-mono"
                   style={{ fontFamily: "'Source Code Pro', monospace" }}
                 />
@@ -281,7 +281,7 @@ export const Settings: React.FC = () => {
                   id="replica"
                   value={settings.replica}
                   onChange={(e) => setSettings({ ...settings, replica: e.target.value })}
-                  placeholder="r9c55f9312fb"
+                  placeholder="rb17cf590e15"
                   className="bg-black/20 font-mono"
                   style={{ fontFamily: "'Source Code Pro', monospace" }}
                 />
