@@ -6,10 +6,7 @@ import {
   IntroLoading,
   Outage,
   OutOfMinutes,
-  Intro,
-  Instructions,
   Conversation,
-  FinalScreen,
   Settings,
 } from "./screens";
 
@@ -24,24 +21,16 @@ function App() {
         return <Outage />;
       case "outOfMinutes":
         return <OutOfMinutes />;
-      case "intro":
-        return <Intro />;
       case "settings":
         return <Settings />;
-      case "instructions":
-        return <Instructions />;
       case "conversation":
-        return <Conversation />;
-      case "finalScreen":
-        return <FinalScreen />;
       default:
-        return <IntroLoading />;
+        return <Conversation />;
     }
   };
 
-  const isConversationScreen = currentScreen === "conversation";
-
-  if (isConversationScreen) {
+  // For conversation screen, use full screen layout
+  if (currentScreen === "conversation") {
     return (
       <main className="h-svh w-full bg-black">
         {renderScreen()}

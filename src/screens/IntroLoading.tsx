@@ -6,7 +6,7 @@ import { quantum } from 'ldrs';
 
 const screens = {
   error: "outage",
-  success: "intro",
+  success: "conversation",
   outOfTime: "outOfMinutes",
 } as const;
 

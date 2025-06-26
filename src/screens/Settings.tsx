@@ -73,17 +73,15 @@ const Textarea = React.forwardRef<
 });
 Textarea.displayName = "Textarea";
 
-// Switch Component
-const Switch = React.forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement>
+// Select Component
+const Select = React.forwardRef<
+  HTMLSelectElement,
+  React.SelectHTMLAttributes<HTMLSelectElement>
 >(({ className, ...props }, ref) => {
   return (
-    <input
-      type="checkbox"
-      role="switch"
+    <select
       className={cn(
-        "peer h-6 w-11 rounded-full bg-input transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary",
+        "flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       ref={ref}
@@ -91,7 +89,7 @@ const Switch = React.forwardRef<
     />
   );
 });
-Switch.displayName = "Switch";
+Select.displayName = "Select";
 
 // Label Component
 const Label = React.forwardRef<
@@ -110,24 +108,6 @@ const Label = React.forwardRef<
   );
 });
 Label.displayName = "Label";
-
-// Select Component
-const Select = React.forwardRef<
-  HTMLSelectElement,
-  React.SelectHTMLAttributes<HTMLSelectElement>
->(({ className, ...props }, ref) => {
-  return (
-    <select
-      className={cn(
-        "flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-        className
-      )}
-      ref={ref}
-      {...props}
-    />
-  );
-});
-Select.displayName = "Select";
 
 export const Settings: React.FC = () => {
   const [settings, setSettings] = useAtom(settingsAtom);
@@ -151,9 +131,7 @@ export const Settings: React.FC = () => {
   ];
 
   const handleClose = () => {
-    setScreenState({ 
-      currentScreen: token ? "instructions" : "intro" 
-    });
+    setScreenState({ currentScreen: "conversation" });
   };
 
   const handleSave = async () => {
