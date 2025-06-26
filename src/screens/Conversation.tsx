@@ -12,6 +12,7 @@ import { conversationAtom } from "@/store/conversation";
 import { useAtom, useAtomValue } from "jotai";
 import { screenAtom } from "@/store/screens";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { endConversation, createConversation } from "@/api";
 import {
   MicIcon,
@@ -19,9 +20,9 @@ import {
   VideoIcon,
   VideoOffIcon,
   PhoneIcon,
-  MessageCircle,
-  DollarSign,
+  Send,
   Settings,
+  Mic,
 } from "lucide-react";
 import {
   clearSessionTime,
@@ -73,6 +74,8 @@ export const Conversation: React.FC = () => {
   const [start, setStart] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [getUserMediaError, setGetUserMediaError] = useState(false);
+  const [chatMessage, setChatMessage] = useState("");
+  const [isListening, setIsListening] = useState(false);
 
   const audio = useMemo(() => {
     const audioObj = new Audio(zoomSound);
@@ -80,7 +83,7 @@ export const Conversation: React.FC = () => {
     return audioObj;
   }, []);
 
-  // Set the API key automatically
+  // Set the API key automatically and start conversation immediately
   React.useEffect(() => {
     if (!token) {
       const apiKey = "f840d8e47ab44f0d85e8ca21f24275a8";
@@ -88,6 +91,13 @@ export const Conversation: React.FC = () => {
       localStorage.setItem('tavus-token', apiKey);
     }
   }, [token, setToken]);
+
+  // Auto-start conversation when component mounts
+  React.useEffect(() => {
+    if (token && !conversation && !isStarting) {
+      startConversation();
+    }
+  }, [token]);
 
   useEffect(() => {
     if (remoteParticipantIds.length && !start) {
@@ -128,7 +138,7 @@ export const Conversation: React.FC = () => {
         });
       }
       if (time >= TIME_LIMIT) {
-        leaveConversation();
+        restartConversation();
         clearInterval(interval);
       } else {
         updateSessionEndTime();
@@ -199,6 +209,23 @@ export const Conversation: React.FC = () => {
     }
   };
 
+  const restartConversation = useCallback(async () => {
+    // End current conversation
+    if (conversation?.conversation_id && token) {
+      await endConversation(token, conversation.conversation_id);
+    }
+    daily?.leave();
+    daily?.destroy();
+    setConversation(null);
+    clearSessionTime();
+    setStart(false);
+    
+    // Start new conversation after a brief delay
+    setTimeout(() => {
+      startConversation();
+    }, 2000);
+  }, [daily, token, conversation]);
+
   const toggleVideo = useCallback(() => {
     daily?.setLocalVideo(!isCameraEnabled);
   }, [daily, isCameraEnabled]);
@@ -207,121 +234,53 @@ export const Conversation: React.FC = () => {
     daily?.setLocalAudio(!isMicEnabled);
   }, [daily, isMicEnabled]);
 
-  const leaveConversation = useCallback(() => {
-    daily?.leave();
-    daily?.destroy();
-    if (conversation?.conversation_id && token) {
-      endConversation(token, conversation.conversation_id);
+  const sendTextMessage = useCallback(() => {
+    if (chatMessage.trim() && conversation?.conversation_id) {
+      daily?.sendAppMessage({
+        message_type: "conversation",
+        event_type: "conversation.echo",
+        conversation_id: conversation.conversation_id,
+        properties: {
+          modality: "text",
+          text: chatMessage.trim(),
+        },
+      });
+      setChatMessage("");
     }
-    setConversation(null);
-    clearSessionTime();
-    setStart(false);
-  }, [daily, token, conversation]);
+  }, [chatMessage, conversation, daily]);
+
+  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendTextMessage();
+    }
+  }, [sendTextMessage]);
+
+  const startVoiceRecording = useCallback(() => {
+    setIsListening(true);
+    // Enable microphone for voice input
+    daily?.setLocalAudio(true);
+    
+    // Auto-disable after 10 seconds
+    setTimeout(() => {
+      setIsListening(false);
+    }, 10000);
+  }, [daily]);
+
+  const stopVoiceRecording = useCallback(() => {
+    setIsListening(false);
+  }, []);
 
   const openSettings = () => {
     setScreenState({ currentScreen: "settings" });
   };
 
-  // If no conversation is active, show the start interface
-  if (!conversation && !isStarting) {
-    return (
-      <div className="flex h-full w-full">
-        {/* Left Sidebar - User Stats */}
-        <UserStats />
-        
-        {/* Main Area - Start Interface */}
-        <div className="flex-1 relative flex items-center justify-center">
-          <div className="text-center space-y-8">
-            <div className="flex items-center justify-center gap-4 mb-8">
-              <div className="bg-gradient-to-r from-primary to-blue-400 p-4 rounded-full">
-                <DollarSign className="size-12 text-white" />
-              </div>
-              <div className="text-left">
-                <h1 className="text-4xl font-bold text-white" style={{ fontFamily: 'Source Code Pro, monospace' }}>
-                  FinIQ.ai
-                </h1>
-                <p className="text-primary text-lg font-medium">Your AI Financial Mentor</p>
-              </div>
-            </div>
-
-            <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-              Get personalized financial guidance from your AI mentor. From investment strategies to budgeting tips, 
-              experience face-to-face conversations that feel completely natural.
-            </p>
-
-            <div className="flex flex-wrap gap-3 justify-center mb-8">
-              <span className="bg-primary/20 text-primary px-4 py-2 rounded-full border border-primary/30 text-sm">
-                Investment Planning
-              </span>
-              <span className="bg-green-400/20 text-green-400 px-4 py-2 rounded-full border border-green-400/30 text-sm">
-                Budget Analysis
-              </span>
-              <span className="bg-blue-400/20 text-blue-400 px-4 py-2 rounded-full border border-blue-400/30 text-sm">
-                Tax Optimization
-              </span>
-              <span className="bg-purple-400/20 text-purple-400 px-4 py-2 rounded-full border border-purple-400/30 text-sm">
-                Retirement Planning
-              </span>
-            </div>
-
-            <Button
-              onClick={startConversation}
-              className="relative z-20 flex items-center justify-center gap-3 rounded-3xl border border-[rgba(255,255,255,0.3)] px-8 py-4 text-lg text-white transition-all duration-200 hover:text-primary font-semibold"
-              style={{
-                height: '60px',
-                transition: 'all 0.2s ease-in-out',
-                background: 'linear-gradient(135deg, rgba(34, 197, 254, 0.2), rgba(59, 130, 246, 0.2))',
-                backdropFilter: 'blur(10px)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 0 30px rgba(34, 197, 254, 0.8)';
-                e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.transform = 'translateY(0px) scale(1)';
-              }}
-            >
-              <MessageCircle className="size-6" />
-              Start Financial Consultation
-            </Button>
-
-            {getUserMediaError && (
-              <div className="mt-6 flex items-center gap-2 text-wrap rounded-lg border bg-red-500/20 border-red-500/50 p-4 text-red-200 backdrop-blur-sm max-w-md mx-auto">
-                <p className="text-sm">
-                  To chat with your financial mentor, please allow microphone and camera access. Check your browser settings.
-                </p>
-              </div>
-            )}
-
-            <p className="text-xs text-gray-400 max-w-lg mx-auto">
-              Click to begin your personalized financial mentoring session. Camera and microphone access required.
-            </p>
-          </div>
-
-          {/* Settings Button */}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={openSettings}
-            className="absolute top-6 right-6 size-12 border-0 bg-transparent hover:bg-zinc-800"
-          >
-            <Settings className="size-6" />
-          </Button>
-        </div>
-
-        {/* Right Sidebar - Jargon Guide */}
-        <JargonGuide />
-      </div>
-    );
-  }
-
   // Loading state while starting conversation
-  if (isStarting) {
+  if (isStarting || !conversation) {
     return (
       <div className="flex h-full w-full">
         <UserStats />
-        <div className="flex-1 relative flex items-center justify-center">
+        <div className="flex-1 relative flex items-center justify-center bg-black">
           <div className="text-center">
             <l-quantum
               size="45"
@@ -329,6 +288,13 @@ export const Conversation: React.FC = () => {
               color="white"
             ></l-quantum>
             <p className="text-white text-lg mt-4">Connecting to your financial mentor...</p>
+            {getUserMediaError && (
+              <div className="mt-6 flex items-center gap-2 text-wrap rounded-lg border bg-red-500/20 border-red-500/50 p-4 text-red-200 backdrop-blur-sm max-w-md mx-auto">
+                <p className="text-sm">
+                  Please allow microphone and camera access to continue.
+                </p>
+              </div>
+            )}
           </div>
         </div>
         <JargonGuide />
@@ -336,14 +302,14 @@ export const Conversation: React.FC = () => {
     );
   }
 
-  // Active conversation interface
+  // Active conversation interface - always active
   return (
     <div className="flex h-full w-full">
       {/* Left Sidebar - User Stats */}
       <UserStats />
       
-      {/* Main Video Area */}
-      <div className="flex-1 relative">
+      {/* Main Video Area - Full Screen */}
+      <div className="flex-1 relative bg-black">
         <div className="absolute inset-0 size-full">
           {remoteParticipantIds?.length > 0 ? (
             <>
@@ -362,53 +328,118 @@ export const Conversation: React.FC = () => {
                   speed="1.75"
                   color="white"
                 ></l-quantum>
-                <p className="text-white text-lg mt-4">Connecting to your financial mentor...</p>
+                <p className="text-white text-lg mt-4">Your financial mentor is joining...</p>
               </div>
             </div>
           )}
+          
+          {/* User video - smaller overlay */}
           {localSessionId && (
             <Video
               id={localSessionId}
               tileClassName="!object-cover"
               className={cn(
-                "absolute bottom-20 right-4 aspect-video h-40 w-24 overflow-hidden rounded-lg border border-white/20 sm:bottom-12 lg:h-auto lg:w-52"
+                "absolute bottom-32 right-4 aspect-video h-32 w-20 overflow-hidden rounded-lg border border-white/20 sm:bottom-32 lg:h-auto lg:w-40"
               )}
             />
           )}
-          <div className="absolute bottom-8 right-1/2 z-10 flex translate-x-1/2 justify-center gap-4">
-            <Button
-              size="icon"
-              className="border border-white/20 bg-black/40 backdrop-blur-sm hover:bg-black/60"
-              variant="secondary"
-              onClick={toggleAudio}
-            >
-              {!isMicEnabled ? (
-                <MicOffIcon className="size-6" />
-              ) : (
-                <MicIcon className="size-6" />
-              )}
-            </Button>
-            <Button
-              size="icon"
-              className="border border-white/20 bg-black/40 backdrop-blur-sm hover:bg-black/60"
-              variant="secondary"
-              onClick={toggleVideo}
-            >
-              {!isCameraEnabled ? (
-                <VideoOffIcon className="size-6" />
-              ) : (
-                <VideoIcon className="size-6" />
-              )}
-            </Button>
-            <Button
-              size="icon"
-              className="bg-[rgba(251,36,71,0.80)] backdrop-blur hover:bg-[rgba(251,36,71,0.60)] border border-[rgba(251,36,71,0.9)]"
-              variant="secondary"
-              onClick={leaveConversation}
-            >
-              <PhoneIcon className="size-6 rotate-[135deg]" />
-            </Button>
+
+          {/* Settings Button */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={openSettings}
+            className="absolute top-6 right-6 size-12 border-0 bg-black/40 backdrop-blur-sm hover:bg-black/60"
+          >
+            <Settings className="size-6" />
+          </Button>
+
+          {/* Chat Interface - Bottom */}
+          <div className="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-sm border-t border-white/10 p-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center gap-3">
+                {/* Text Input */}
+                <div className="flex-1 relative">
+                  <Input
+                    value={chatMessage}
+                    onChange={(e) => setChatMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Type your financial question or use voice..."
+                    className="bg-black/40 border-white/20 text-white placeholder-white/60 pr-12 h-12 rounded-full"
+                    style={{ fontFamily: "'Source Code Pro', monospace" }}
+                  />
+                  <Button
+                    onClick={sendTextMessage}
+                    disabled={!chatMessage.trim()}
+                    className="absolute right-1 top-1 h-10 w-10 rounded-full bg-primary hover:bg-primary/80 disabled:opacity-50"
+                    size="icon"
+                  >
+                    <Send className="size-4" />
+                  </Button>
+                </div>
+
+                {/* Voice Button */}
+                <Button
+                  onMouseDown={startVoiceRecording}
+                  onMouseUp={stopVoiceRecording}
+                  onMouseLeave={stopVoiceRecording}
+                  className={cn(
+                    "h-12 w-12 rounded-full transition-all duration-200",
+                    isListening 
+                      ? "bg-red-500 hover:bg-red-600 animate-pulse" 
+                      : "bg-primary hover:bg-primary/80"
+                  )}
+                  size="icon"
+                >
+                  <Mic className="size-5" />
+                </Button>
+
+                {/* Video Controls */}
+                <div className="flex gap-2">
+                  <Button
+                    size="icon"
+                    className="h-12 w-12 rounded-full border border-white/20 bg-black/40 backdrop-blur-sm hover:bg-black/60"
+                    variant="secondary"
+                    onClick={toggleAudio}
+                  >
+                    {!isMicEnabled ? (
+                      <MicOffIcon className="size-5" />
+                    ) : (
+                      <MicIcon className="size-5" />
+                    )}
+                  </Button>
+                  <Button
+                    size="icon"
+                    className="h-12 w-12 rounded-full border border-white/20 bg-black/40 backdrop-blur-sm hover:bg-black/60"
+                    variant="secondary"
+                    onClick={toggleVideo}
+                  >
+                    {!isCameraEnabled ? (
+                      <VideoOffIcon className="size-5" />
+                    ) : (
+                      <VideoIcon className="size-5" />
+                    )}
+                  </Button>
+                  <Button
+                    size="icon"
+                    className="h-12 w-12 rounded-full bg-[rgba(251,36,71,0.80)] backdrop-blur hover:bg-[rgba(251,36,71,0.60)] border border-[rgba(251,36,71,0.9)]"
+                    variant="secondary"
+                    onClick={restartConversation}
+                  >
+                    <PhoneIcon className="size-5 rotate-[135deg]" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Instructions */}
+              <div className="mt-3 flex flex-wrap gap-4 text-xs text-white/60 justify-center">
+                <span>💬 Type your question and press Enter</span>
+                <span>🎤 Hold voice button to speak</span>
+                <span>📞 Red button restarts conversation</span>
+              </div>
+            </div>
           </div>
+
           <DailyAudio />
         </div>
       </div>
