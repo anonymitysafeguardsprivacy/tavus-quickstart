@@ -23,6 +23,8 @@ import {
   Send,
   Settings,
   Mic,
+  Camera,
+  AlertTriangle,
 } from "lucide-react";
 import {
   clearSessionTime,
@@ -73,7 +75,8 @@ export const Conversation: React.FC = () => {
   const remoteParticipantIds = useParticipantIds({ filter: "remote" });
   const [start, setStart] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
-  const [getUserMediaError, setGetUserMediaError] = useState(false);
+  const [hasMediaAccess, setHasMediaAccess] = useState(false);
+  const [mediaError, setMediaError] = useState<string | null>(null);
   const [chatMessage, setChatMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
 
@@ -83,7 +86,7 @@ export const Conversation: React.FC = () => {
     return audioObj;
   }, []);
 
-  // Set the API key automatically and start conversation immediately
+  // Set the API key automatically
   React.useEffect(() => {
     if (!token) {
       const apiKey = "f840d8e47ab44f0d85e8ca21f24275a8";
@@ -91,13 +94,6 @@ export const Conversation: React.FC = () => {
       localStorage.setItem('tavus-token', apiKey);
     }
   }, [token, setToken]);
-
-  // Auto-start conversation when component mounts
-  React.useEffect(() => {
-    if (token && !conversation && !isStarting) {
-      startConversation();
-    }
-  }, [token]);
 
   useEffect(() => {
     if (remoteParticipantIds.length && !start) {
@@ -162,48 +158,50 @@ export const Conversation: React.FC = () => {
     }
   }, [conversation?.conversation_url]);
 
-  const startConversation = async () => {
+  const requestMediaAccess = async () => {
     try {
       setIsStarting(true);
+      setMediaError(null);
       
       audio.currentTime = 0;
       await audio.play();
       
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      let micDeviceId = currentMic?.device?.deviceId;
-      if (!micDeviceId) {
-        const res = await daily?.startCamera({
-          startVideoOff: false,
-          startAudioOff: false,
-          audioSource: "default",
-        });
+      // Request camera and microphone access
+      const res = await daily?.startCamera({
+        startVideoOff: false,
+        startAudioOff: false,
+        audioSource: "default",
+      });
+
+      if (res?.mic && res?.camera) {
+        setHasMediaAccess(true);
+        
+        // Set default devices
         // @ts-expect-error deviceId exists in the MediaDeviceInfo
         const isDefaultMic = res?.mic?.deviceId === "default";
         // @ts-expect-error deviceId exists in the MediaDeviceInfo
         const isDefaultSpeaker = res?.speaker?.deviceId === "default";
-        // @ts-expect-error deviceId exists in the MediaDeviceInfo
-        micDeviceId = res?.mic?.deviceId;
 
-        if (isDefaultMic) {
-          if (!isDefaultMic) {
-            setMicrophone("default");
-          }
-          if (!isDefaultSpeaker) {
-            setSpeaker("default");
-          }
+        if (!isDefaultMic) {
+          setMicrophone("default");
         }
-      }
-      
-      if (micDeviceId && token) {
-        const newConversation = await createConversation(token);
-        setConversation(newConversation);
+        if (!isDefaultSpeaker) {
+          setSpeaker("default");
+        }
+
+        // Start conversation after media access is granted
+        if (token) {
+          const newConversation = await createConversation(token);
+          setConversation(newConversation);
+        }
       } else {
-        setGetUserMediaError(true);
+        throw new Error("Failed to access camera or microphone");
       }
     } catch (error) {
-      console.error(error);
-      setGetUserMediaError(true);
+      console.error("Media access error:", error);
+      setMediaError("Please allow camera and microphone access to continue with the video call.");
     } finally {
       setIsStarting(false);
     }
@@ -222,9 +220,11 @@ export const Conversation: React.FC = () => {
     
     // Start new conversation after a brief delay
     setTimeout(() => {
-      startConversation();
+      if (hasMediaAccess && token) {
+        createConversation(token).then(setConversation);
+      }
     }, 2000);
-  }, [daily, token, conversation]);
+  }, [daily, token, conversation, hasMediaAccess]);
 
   const toggleVideo = useCallback(() => {
     daily?.setLocalVideo(!isCameraEnabled);
@@ -257,15 +257,17 @@ export const Conversation: React.FC = () => {
   }, [sendTextMessage]);
 
   const startVoiceRecording = useCallback(() => {
-    setIsListening(true);
-    // Enable microphone for voice input
-    daily?.setLocalAudio(true);
-    
-    // Auto-disable after 10 seconds
-    setTimeout(() => {
-      setIsListening(false);
-    }, 10000);
-  }, [daily]);
+    if (hasMediaAccess) {
+      setIsListening(true);
+      // Enable microphone for voice input
+      daily?.setLocalAudio(true);
+      
+      // Auto-disable after 10 seconds
+      setTimeout(() => {
+        setIsListening(false);
+      }, 10000);
+    }
+  }, [daily, hasMediaAccess]);
 
   const stopVoiceRecording = useCallback(() => {
     setIsListening(false);
@@ -274,6 +276,84 @@ export const Conversation: React.FC = () => {
   const openSettings = () => {
     setScreenState({ currentScreen: "settings" });
   };
+
+  // Media access request screen
+  if (!hasMediaAccess) {
+    return (
+      <div className="flex h-full w-full">
+        <UserStats />
+        <div className="flex-1 relative flex items-center justify-center bg-black">
+          <div className="text-center max-w-md">
+            {isStarting ? (
+              <>
+                <l-quantum
+                  size="45"
+                  speed="1.75"
+                  color="white"
+                ></l-quantum>
+                <p className="text-white text-lg mt-4">Requesting access...</p>
+              </>
+            ) : (
+              <>
+                <div className="mb-8">
+                  <h1 className="text-white text-2xl font-bold mb-4">
+                    Start Your Financial Consultation
+                  </h1>
+                  <p className="text-white/70 text-base mb-8">
+                    To begin your video call with your AI financial mentor, please grant access to your camera and microphone.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-4 mb-8">
+                  <div className="flex items-center gap-4 bg-black/20 border border-white/10 rounded-lg p-4">
+                    <div className="bg-primary/20 p-3 rounded-full">
+                      <Camera className="size-6 text-primary" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-white font-semibold">Camera Access</h3>
+                      <p className="text-white/60 text-sm">Required for video consultation</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 bg-black/20 border border-white/10 rounded-lg p-4">
+                    <div className="bg-primary/20 p-3 rounded-full">
+                      <Mic className="size-6 text-primary" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-white font-semibold">Microphone Access</h3>
+                      <p className="text-white/60 text-sm">Required for voice interaction</p>
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={requestMediaAccess}
+                  className="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-full font-semibold text-lg h-auto"
+                  disabled={isStarting}
+                >
+                  <Camera className="size-5 mr-2" />
+                  <Mic className="size-5 mr-3" />
+                  Enable Camera & Microphone
+                </Button>
+
+                {mediaError && (
+                  <div className="mt-6 flex items-center gap-2 text-wrap rounded-lg border bg-red-500/20 border-red-500/50 p-4 text-red-200 backdrop-blur-sm">
+                    <AlertTriangle className="size-5 flex-shrink-0" />
+                    <p className="text-sm">{mediaError}</p>
+                  </div>
+                )}
+
+                <div className="mt-8 text-white/50 text-sm">
+                  <p>Your privacy is protected. Media access is only used for this consultation.</p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        <JargonGuide />
+      </div>
+    );
+  }
 
   // Loading state while starting conversation
   if (isStarting || !conversation) {
@@ -288,13 +368,6 @@ export const Conversation: React.FC = () => {
               color="white"
             ></l-quantum>
             <p className="text-white text-lg mt-4">Connecting to your financial mentor...</p>
-            {getUserMediaError && (
-              <div className="mt-6 flex items-center gap-2 text-wrap rounded-lg border bg-red-500/20 border-red-500/50 p-4 text-red-200 backdrop-blur-sm max-w-md mx-auto">
-                <p className="text-sm">
-                  Please allow microphone and camera access to continue.
-                </p>
-              </div>
-            )}
           </div>
         </div>
         <JargonGuide />
