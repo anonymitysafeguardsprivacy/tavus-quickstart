@@ -2,7 +2,7 @@ import { AnimatedWrapper } from "@/components/DialogWrapper";
 import React, { useCallback, useMemo, useState } from "react";
 import { useAtom, useAtomValue } from "jotai";
 import { screenAtom } from "@/store/screens";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, DollarSign } from "lucide-react";
 import AudioButton from "@/components/AudioButton";
 import { apiTokenAtom } from "@/store/tokens";
 import { conversationAtom } from "@/store/conversation";
