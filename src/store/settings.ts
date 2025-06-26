@@ -21,11 +21,11 @@ const getInitialSettings = (): Settings => {
     interruptSensitivity: "medium",
     greeting: "",
     context: "",
-    persona: "",
-    replica: "",
+    persona: "pa8f0acdbb4d",
+    replica: "r9c55f9312fb",
   };
 };
 
 export const settingsAtom = atom<Settings>(getInitialSettings());
 
-export const settingsSavedAtom = atom<boolean>(false); 
+export const settingsSavedAtom = atom<boolean>(false);

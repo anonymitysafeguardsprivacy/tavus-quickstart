@@ -21,10 +21,11 @@ export const createConversation = async (
   contextString += settings.context || "";
   
   const payload = {
-    persona_id: settings.persona || "pd43ffef",
+    persona_id: settings.persona || "pa8f0acdbb4d",
+    replica_id: settings.replica || "r9c55f9312fb",
     custom_greeting: settings.greeting !== undefined && settings.greeting !== null 
       ? settings.greeting 
-      : "Hey there! I'm your technical co-pilot! Let's get get started building with Tavus.",
+      : "Hey there! I'm your AI mentor! Let's get started on your learning journey.",
     conversational_context: contextString
   };
   

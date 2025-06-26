@@ -291,7 +291,7 @@ export const Settings: React.FC = () => {
                   id="persona"
                   value={settings.persona}
                   onChange={(e) => setSettings({ ...settings, persona: e.target.value })}
-                  placeholder="p2fbd605"
+                  placeholder="pa8f0acdbb4d"
                   className="bg-black/20 font-mono"
                   style={{ fontFamily: "'Source Code Pro', monospace" }}
                 />
@@ -303,7 +303,7 @@ export const Settings: React.FC = () => {
                   id="replica"
                   value={settings.replica}
                   onChange={(e) => setSettings({ ...settings, replica: e.target.value })}
-                  placeholder="rfb51183fe"
+                  placeholder="r9c55f9312fb"
                   className="bg-black/20 font-mono"
                   style={{ fontFamily: "'Source Code Pro', monospace" }}
                 />
@@ -340,4 +340,4 @@ export const Settings: React.FC = () => {
       </AnimatedTextBlockWrapper>
     </DialogWrapper>
   );
-}; 
+};
