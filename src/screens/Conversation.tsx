@@ -1,4 +1,3 @@
-import { DialogWrapper } from "@/components/DialogWrapper";
 import {
   DailyAudio,
   useDaily,
@@ -162,75 +161,73 @@ export const Conversation: React.FC = () => {
       
       {/* Main Video Area */}
       <div className="flex-1 relative">
-        <DialogWrapper>
-          <div className="absolute inset-0 size-full">
-            {remoteParticipantIds?.length > 0 ? (
-              <>
-                <Timer />
-                <Video
-                  id={remoteParticipantIds[0]}
-                  className="size-full"
-                  tileClassName="!object-cover"
-                />
-              </>
-            ) : (
-              <div className="flex h-full items-center justify-center">
-                <div className="text-center">
-                  <l-quantum
-                    size="45"
-                    speed="1.75"
-                    color="white"
-                  ></l-quantum>
-                  <p className="text-white text-lg mt-4">Connecting to your financial mentor...</p>
-                </div>
-              </div>
-            )}
-            {localSessionId && (
+        <div className="absolute inset-0 size-full">
+          {remoteParticipantIds?.length > 0 ? (
+            <>
+              <Timer />
               <Video
-                id={localSessionId}
+                id={remoteParticipantIds[0]}
+                className="size-full"
                 tileClassName="!object-cover"
-                className={cn(
-                  "absolute bottom-20 right-4 aspect-video h-40 w-24 overflow-hidden rounded-lg border border-white/20 sm:bottom-12 lg:h-auto lg:w-52"
-                )}
               />
-            )}
-            <div className="absolute bottom-8 right-1/2 z-10 flex translate-x-1/2 justify-center gap-4">
-              <Button
-                size="icon"
-                className="border border-white/20 bg-black/40 backdrop-blur-sm hover:bg-black/60"
-                variant="secondary"
-                onClick={toggleAudio}
-              >
-                {!isMicEnabled ? (
-                  <MicOffIcon className="size-6" />
-                ) : (
-                  <MicIcon className="size-6" />
-                )}
-              </Button>
-              <Button
-                size="icon"
-                className="border border-white/20 bg-black/40 backdrop-blur-sm hover:bg-black/60"
-                variant="secondary"
-                onClick={toggleVideo}
-              >
-                {!isCameraEnabled ? (
-                  <VideoOffIcon className="size-6" />
-                ) : (
-                  <VideoIcon className="size-6" />
-                )}
-              </Button>
-              <Button
-                size="icon"
-                className="bg-[rgba(251,36,71,0.80)] backdrop-blur hover:bg-[rgba(251,36,71,0.60)] border border-[rgba(251,36,71,0.9)]"
-                variant="secondary"
-                onClick={leaveConversation}
-              >
-                <PhoneIcon className="size-6 rotate-[135deg]" />
-              </Button>
+            </>
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <l-quantum
+                  size="45"
+                  speed="1.75"
+                  color="white"
+                ></l-quantum>
+                <p className="text-white text-lg mt-4">Connecting to your financial mentor...</p>
+              </div>
             </div>
-            <DailyAudio />
+          )}
+          {localSessionId && (
+            <Video
+              id={localSessionId}
+              tileClassName="!object-cover"
+              className={cn(
+                "absolute bottom-20 right-4 aspect-video h-40 w-24 overflow-hidden rounded-lg border border-white/20 sm:bottom-12 lg:h-auto lg:w-52"
+              )}
+            />
+          )}
+          <div className="absolute bottom-8 right-1/2 z-10 flex translate-x-1/2 justify-center gap-4">
+            <Button
+              size="icon"
+              className="border border-white/20 bg-black/40 backdrop-blur-sm hover:bg-black/60"
+              variant="secondary"
+              onClick={toggleAudio}
+            >
+              {!isMicEnabled ? (
+                <MicOffIcon className="size-6" />
+              ) : (
+                <MicIcon className="size-6" />
+              )}
+            </Button>
+            <Button
+              size="icon"
+              className="border border-white/20 bg-black/40 backdrop-blur-sm hover:bg-black/60"
+              variant="secondary"
+              onClick={toggleVideo}
+            >
+              {!isCameraEnabled ? (
+                <VideoOffIcon className="size-6" />
+              ) : (
+                <VideoIcon className="size-6" />
+              )}
+            </Button>
+            <Button
+              size="icon"
+              className="bg-[rgba(251,36,71,0.80)] backdrop-blur hover:bg-[rgba(251,36,71,0.60)] border border-[rgba(251,36,71,0.9)]"
+              variant="secondary"
+              onClick={leaveConversation}
+            >
+              <PhoneIcon className="size-6 rotate-[135deg]" />
+            </Button>
           </div>
-        </DialogWrapper>
+          <DailyAudio />
+        </div>
       </div>
 
       {/* Right Sidebar - Jargon Guide */}
