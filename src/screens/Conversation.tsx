@@ -190,14 +190,14 @@ export const Conversation: React.FC = () => {
                 id={localSessionId}
                 tileClassName="!object-cover"
                 className={cn(
-                  "absolute bottom-20 right-4 aspect-video h-40 w-24 overflow-hidden rounded-lg border-2 border-[#22C5FE] shadow-[0_0_20px_rgba(34,197,254,0.3)] sm:bottom-12 lg:h-auto lg:w-52"
+                  "absolute bottom-20 right-4 aspect-video h-40 w-24 overflow-hidden rounded-lg border border-white/20 sm:bottom-12 lg:h-auto lg:w-52"
                 )}
               />
             )}
             <div className="absolute bottom-8 right-1/2 z-10 flex translate-x-1/2 justify-center gap-4">
               <Button
                 size="icon"
-                className="border border-[#22C5FE] shadow-[0_0_20px_rgba(34,197,254,0.2)]"
+                className="border border-white/20 bg-black/40 backdrop-blur-sm hover:bg-black/60"
                 variant="secondary"
                 onClick={toggleAudio}
               >
@@ -209,7 +209,7 @@ export const Conversation: React.FC = () => {
               </Button>
               <Button
                 size="icon"
-                className="border border-[#22C5FE] shadow-[0_0_20px_rgba(34,197,254,0.2)]"
+                className="border border-white/20 bg-black/40 backdrop-blur-sm hover:bg-black/60"
                 variant="secondary"
                 onClick={toggleVideo}
               >
@@ -221,7 +221,7 @@ export const Conversation: React.FC = () => {
               </Button>
               <Button
                 size="icon"
-                className="bg-[rgba(251,36,71,0.80)] backdrop-blur hover:bg-[rgba(251,36,71,0.60)] border border-[rgba(251,36,71,0.9)] shadow-[0_0_20px_rgba(251,36,71,0.3)]"
+                className="bg-[rgba(251,36,71,0.80)] backdrop-blur hover:bg-[rgba(251,36,71,0.60)] border border-[rgba(251,36,71,0.9)]"
                 variant="secondary"
                 onClick={leaveConversation}
               >
