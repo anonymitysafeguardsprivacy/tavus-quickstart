@@ -39,11 +39,17 @@ function App() {
     }
   };
 
+  const isConversationScreen = currentScreen === "conversation";
+
   return (
-    <main className="flex h-svh flex-col items-center justify-between gap-3 p-5 sm:gap-4 lg:p-8 bg-black">
-      {currentScreen !== "introLoading" && <Header />}
-      {renderScreen()}
-      {currentScreen !== "introLoading" && <Footer />}
+    <main className={`flex h-svh flex-col items-center justify-between gap-3 p-5 sm:gap-4 lg:p-8 bg-black ${
+      isConversationScreen ? 'p-0' : ''
+    }`}>
+      {currentScreen !== "introLoading" && !isConversationScreen && <Header />}
+      <div className={`flex-1 w-full ${isConversationScreen ? 'h-full' : ''}`}>
+        {renderScreen()}
+      </div>
+      {currentScreen !== "introLoading" && !isConversationScreen && <Footer />}
     </main>
   );
 }

@@ -141,7 +141,7 @@ export const Intro: React.FC = () => {
             speed="1.75"
             color="white"
           ></l-quantum>
-          <p className="text-white text-lg">Connecting to your mentor...</p>
+          <p className="text-white text-lg">Connecting to your financial mentor...</p>
         </div>
       </AnimatedWrapper>
     );
@@ -198,48 +198,71 @@ export const Intro: React.FC = () => {
             fontFamily: 'Inter, sans-serif',
             background: 'rgba(0,0,0,0.3)'
           }}>
-          <img src="/public/images/vector.svg" alt="Logo" className="mb-2" style={{ width: '48px', height: 'auto' }} />
-
-          <h1 className="text-2xl font-bold text-white mb-2 text-center" style={{ fontFamily: 'Source Code Pro, monospace' }}>
-            CVI Demo Playground
-          </h1>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="bg-gradient-to-r from-primary to-blue-400 p-3 rounded-full">
+              <DollarSign className="size-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-white" style={{ fontFamily: 'Source Code Pro, monospace' }}>
+                FinIQ.ai
+              </h1>
+              <p className="text-primary text-sm font-medium">Your AI Financial Mentor</p>
+            </div>
+          </div>
 
           <p className="text-sm text-gray-300 text-center max-w-md mb-4">
-            Experience face-to-face conversation with an AI mentor so real, it feels human—an intelligent guide ready to listen, respond, and help you grow.
+            Get personalized financial guidance from your AI mentor. From investment strategies to budgeting tips, 
+            experience face-to-face conversations that feel completely natural.
           </p>
+
+          <div className="flex flex-wrap gap-2 mb-6 text-xs">
+            <span className="bg-primary/20 text-primary px-3 py-1 rounded-full border border-primary/30">
+              Investment Planning
+            </span>
+            <span className="bg-green-400/20 text-green-400 px-3 py-1 rounded-full border border-green-400/30">
+              Budget Analysis
+            </span>
+            <span className="bg-blue-400/20 text-blue-400 px-3 py-1 rounded-full border border-blue-400/30">
+              Tax Optimization
+            </span>
+            <span className="bg-purple-400/20 text-purple-400 px-3 py-1 rounded-full border border-purple-400/30">
+              Retirement Planning
+            </span>
+          </div>
 
           <AudioButton 
             onClick={handleClick}
-            className="relative z-20 flex items-center justify-center gap-3 rounded-3xl border border-[rgba(255,255,255,0.3)] px-6 py-3 text-base text-white transition-all duration-200 hover:text-primary font-medium"
+            className="relative z-20 flex items-center justify-center gap-3 rounded-3xl border border-[rgba(255,255,255,0.3)] px-8 py-4 text-lg text-white transition-all duration-200 hover:text-primary font-semibold"
             disabled={isLoading}
             style={{
-              height: '52px',
+              height: '60px',
               transition: 'all 0.2s ease-in-out',
-              backgroundColor: 'rgba(0,0,0,0.3)',
+              background: 'linear-gradient(135deg, rgba(34, 197, 254, 0.2), rgba(59, 130, 246, 0.2))',
+              backdropFilter: 'blur(10px)',
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {
-                e.currentTarget.style.boxShadow = '0 0 20px rgba(34, 197, 254, 0.6)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 0 30px rgba(34, 197, 254, 0.8)';
+                e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.boxShadow = 'none';
-              e.currentTarget.style.transform = 'translateY(0px)';
+              e.currentTarget.style.transform = 'translateY(0px) scale(1)';
             }}
           >
-            <MessageCircle className="size-5" />
-            Talk with Mentor
+            <MessageCircle className="size-6" />
+            Start Financial Consultation
           </AudioButton>
 
           <p className="text-xs text-gray-400 text-center max-w-sm">
-            Click to start an interactive video conversation with your AI mentor
+            Click to begin your personalized financial mentoring session
           </p>
 
           {getUserMediaError && (
             <div className="mt-4 flex items-center gap-2 text-wrap rounded-lg border bg-red-500/20 border-red-500/50 p-3 text-red-200 backdrop-blur-sm max-w-md">
               <p className="text-sm">
-                To chat with your mentor, please allow microphone and camera access. Check your browser settings.
+                To chat with your financial mentor, please allow microphone and camera access. Check your browser settings.
               </p>
             </div>
           )}

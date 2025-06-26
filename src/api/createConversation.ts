@@ -13,19 +13,26 @@ export const createConversation = async (
   console.log('Greeting value:', settings.greeting);
   console.log('Context value:', settings.context);
   
-  // Build the context string
-  let contextString = "";
+  // Build the context string for financial mentoring
+  let contextString = "You are a professional financial mentor and advisor with expertise in investment planning, budgeting, tax optimization, retirement planning, and general financial literacy. ";
+  
   if (settings.name) {
-    contextString = `You are talking with the user, ${settings.name}. Additional context: `;
+    contextString += `You are talking with ${settings.name}. `;
   }
-  contextString += settings.context || "";
+  
+  contextString += "Provide personalized financial advice, explain complex financial concepts in simple terms, and help users make informed financial decisions. ";
+  contextString += "Use real-world examples and be encouraging while maintaining professional standards. ";
+  
+  if (settings.context) {
+    contextString += `Additional context: ${settings.context}`;
+  }
   
   const payload = {
     persona_id: settings.persona || "pa8f0acdbb4d",
     replica_id: settings.replica || "r9c55f9312fb",
     custom_greeting: settings.greeting !== undefined && settings.greeting !== null 
       ? settings.greeting 
-      : "Hey there! I'm your AI mentor! Let's get started on your learning journey.",
+      : "Hello! I'm your AI financial mentor. I'm here to help you navigate your financial journey, whether it's investment planning, budgeting, retirement strategies, or understanding complex financial concepts. What financial goals would you like to discuss today?",
     conversational_context: contextString
   };
   
